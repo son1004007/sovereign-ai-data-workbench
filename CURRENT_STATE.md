@@ -40,6 +40,7 @@ Source:
 prototype/index.html
 prototype/styles.css
 prototype/app.js
+prototype/enhancements.js
 prototype/README.md
 prototype/UI_SPEC.md
 ```
@@ -51,9 +52,11 @@ Implemented publishing interactions include:
 - multi-project Control Center;
 - analysis-task list/search/filter and task detail;
 - G1-G6 lifecycle presentation;
+- explicit Code & Execution and Results task views;
 - recurring analysis/run comparison/drift presentation;
 - experiments/model registry and explicit candidate activation review;
 - data-source/profiling views;
+- reusable Analysis Recipe catalog and recipe-promotion flow;
 - evidence/retrieval inspector and citation-to-bbox interaction;
 - synthetic mini-evaluation interaction;
 - personal AI-provider profile selection UX;
@@ -71,7 +74,7 @@ Verified 2026-09-03:
 - Synology loopback static HTTP: PASS;
 - Cloudflare Quick Tunnel container: running;
 - external HTTP post-check from Synology: PASS;
-- current preview URL: `https://punch-chronicles-glasgow-scan.trycloudflare.com`;
+- current preview URL: `https://flyer-pictures-armor-anonymous.trycloudflare.com`;
 - published content: synthetic static UI only;
 - public authentication: none.
 
@@ -89,13 +92,12 @@ The Quick Tunnel URL is temporary and may change after tunnel/container restart.
 ## Next product work
 
 1. review the live publishing build and adjust information architecture/UX;
-2. add the dedicated Analysis Recipe catalog if the current grouping is accepted;
-3. define provenance/document/chunk/job/evaluation schemas;
-4. implement coordinate-preserving text-layer PDF ingestion;
-5. implement PostgreSQL/pgvector persistence and durable Postgres-backed job worker;
-6. implement lexical FTS + vector retrieval + RRF + reranker;
-7. implement citation/bbox response contract and automated evaluation;
-8. progressively replace synthetic UI states with real backend contracts and measured evidence.
+2. define provenance/document/chunk/job/evaluation schemas;
+3. implement coordinate-preserving text-layer PDF ingestion;
+4. implement PostgreSQL/pgvector persistence and durable Postgres-backed job worker;
+5. implement lexical FTS + vector retrieval + RRF + reranker;
+6. implement citation/bbox response contract and automated evaluation;
+7. progressively replace synthetic UI states with real backend contracts and measured evidence.
 
 ## Deferred
 
