@@ -26,9 +26,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          node --check prototype/app.js
-          node --check prototype/enhancements.js
-          node --check prototype/korean-guide.js
+          node --check prototype/app-v2.js
 
       - name: Validate publishing contract
         shell: python
@@ -38,53 +36,29 @@ jobs:
 
           root = Path('prototype')
           index = (root / 'index.html').read_text(encoding='utf-8')
-          css = (root / 'styles.css').read_text(encoding='utf-8')
-          guide_css = (root / 'guide.css').read_text(encoding='utf-8')
-          app = (root / 'app.js').read_text(encoding='utf-8')
-          ext = (root / 'enhancements.js').read_text(encoding='utf-8')
-          guide = (root / 'korean-guide.js').read_text(encoding='utf-8')
+          css = (root / 'styles-v2.css').read_text(encoding='utf-8')
+          app = (root / 'app-v2.js').read_text(encoding='utf-8')
 
-          required_files = ['styles.css', 'guide.css', 'app.js', 'enhancements.js', 'korean-guide.js']
-          for name in required_files:
-              assert (root / name).is_file(), f'missing {name}'
-              assert name in index, f'{name} is not referenced by index.html'
+          assert 'styles-v2.css' in index
+          assert 'app-v2.js' in index
+          assert 'app.js' not in index
+          assert 'enhancements.js' not in index
+          assert 'korean-guide.js' not in index
+          assert "connect-src 'none'" in index
+          assert 'noindex,nofollow,noarchive' in index
+          assert '상호작용 정상' in app
+          assert "data-decision" in app
+          assert "data-task-tab" in app
+          assert "simulate-run" in app
+          assert "citation" in app
+          assert "정기 분석" in app
+          assert "ML 실험·모델" in app
+          assert "AI 계정·모델 연결" in app
 
-          required_markers = [
-              'Control Center',
-              'Analysis Tasks',
-              'Recurring',
-              'Experiments & Models',
-              'Data Sources',
-              'Analysis Recipes',
-              'Evidence & Eval',
-              'AI Accounts',
-          ]
-          for marker in required_markers:
-              assert marker in index, f'missing navigation marker: {marker}'
-
-          assert "connect-src 'none'" in index, 'publishing CSP must block browser network connections'
-          assert 'noindex,nofollow,noarchive' in index, 'preview must remain noindex'
-          assert 'data-page="recipes"' in index, 'recipe navigation is missing'
-          assert "state.page === 'recipes'" in ext, 'recipe page router is missing'
-          assert "tab === 'execution'" in ext, 'execution tab renderer is missing'
-          assert "tab === 'results'" in ext, 'results tab renderer is missing'
-          assert 'data-citation' in app and 'bbox-highlight' in app, 'citation-to-evidence interaction is missing'
-          assert '이 기능이 없으면?' in guide, 'feature judgment guide is missing'
-          assert '제안: 필수' in guide and '제안: 조건부' in guide, 'feature necessity labels are missing'
-          assert '통합 관제' in guide and '분석 과제' in guide, 'Korean-first navigation mapping is missing'
-
-          runtime_assets = {
-              'index.html': index,
-              'styles.css': css,
-              'guide.css': guide_css,
-              'app.js': app,
-              'enhancements.js': ext,
-              'korean-guide.js': guide,
-          }
           external = re.compile(r'https?://', re.I)
-          for name, content in runtime_assets.items():
+          for name, content in {'index.html':index,'styles-v2.css':css,'app-v2.js':app}.items():
               assert not external.search(content), f'external runtime URL found in {name}'
 
           print('publishing_contract=PASS')
-          print('korean_guided_review=PASS')
+          print('single_runtime_script=PASS')
           print('runtime_external_dependencies=0')
