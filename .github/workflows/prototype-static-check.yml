@@ -28,6 +28,7 @@ jobs:
           set -euo pipefail
           node --check prototype/app.js
           node --check prototype/enhancements.js
+          node --check prototype/korean-guide.js
 
       - name: Validate publishing contract
         shell: python
@@ -38,10 +39,12 @@ jobs:
           root = Path('prototype')
           index = (root / 'index.html').read_text(encoding='utf-8')
           css = (root / 'styles.css').read_text(encoding='utf-8')
+          guide_css = (root / 'guide.css').read_text(encoding='utf-8')
           app = (root / 'app.js').read_text(encoding='utf-8')
           ext = (root / 'enhancements.js').read_text(encoding='utf-8')
+          guide = (root / 'korean-guide.js').read_text(encoding='utf-8')
 
-          required_files = ['styles.css', 'app.js', 'enhancements.js']
+          required_files = ['styles.css', 'guide.css', 'app.js', 'enhancements.js', 'korean-guide.js']
           for name in required_files:
               assert (root / name).is_file(), f'missing {name}'
               assert name in index, f'{name} is not referenced by index.html'
@@ -66,11 +69,22 @@ jobs:
           assert "tab === 'execution'" in ext, 'execution tab renderer is missing'
           assert "tab === 'results'" in ext, 'results tab renderer is missing'
           assert 'data-citation' in app and 'bbox-highlight' in app, 'citation-to-evidence interaction is missing'
+          assert '이 기능이 없으면?' in guide, 'feature judgment guide is missing'
+          assert '제안: 필수' in guide and '제안: 조건부' in guide, 'feature necessity labels are missing'
+          assert '통합 관제' in guide and '분석 과제' in guide, 'Korean-first navigation mapping is missing'
 
-          runtime_assets = {'index.html': index, 'styles.css': css, 'app.js': app, 'enhancements.js': ext}
+          runtime_assets = {
+              'index.html': index,
+              'styles.css': css,
+              'guide.css': guide_css,
+              'app.js': app,
+              'enhancements.js': ext,
+              'korean-guide.js': guide,
+          }
           external = re.compile(r'https?://', re.I)
           for name, content in runtime_assets.items():
               assert not external.search(content), f'external runtime URL found in {name}'
 
           print('publishing_contract=PASS')
+          print('korean_guided_review=PASS')
           print('runtime_external_dependencies=0')
