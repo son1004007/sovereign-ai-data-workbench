@@ -1,0 +1,63 @@
+name: Backend CI
+
+on:
+  push:
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-ci.yml"
+      - "docker-compose.yml"
+  pull_request:
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-ci.yml"
+      - "docker-compose.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_DB: workbench
+          POSTGRES_USER: workbench
+          POSTGRES_PASSWORD: workbench
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U workbench -d workbench"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+
+    env:
+      WORKBENCH_DATABASE_URL: postgresql://workbench:workbench@127.0.0.1:5432/workbench
+      WORKBENCH_ARTIFACT_ROOT: /tmp/sovereign-workbench-artifacts
+      WORKBENCH_MAX_UPLOAD_BYTES: "10485760"
+      WORKBENCH_WORKER_ID: ci-worker
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/pyproject.toml
+
+      - name: Install backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e './backend[dev]'
+
+      - name: Lint
+        run: ruff check backend/app backend/tests
+
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Apply database migration
+        run: psql "$WORKBENCH_DATABASE_URL" -v ON_ERROR_STOP=1 -f backend/migrations/001_initial.sql
+
+      - name: Run tests
+        run: pytest -q backend/tests
