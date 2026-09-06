@@ -6,14 +6,15 @@
   <meta name="robots" content="noindex,nofollow,noarchive" />
   <meta name="referrer" content="no-referrer" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'" />
-  <title>소버린 AI 데이터 워크벤치 - 기능 검토 화면</title>
+  <title>소버린 AI 데이터 워크벤치 - 화면 설계 퍼블리싱</title>
   <link rel="stylesheet" href="./styles-v2.css" />
+  <link rel="stylesheet" href="./publishing-complete.css" />
   <link rel="stylesheet" href="./mobile-nav-fix.css" />
 </head>
 <body>
   <div class="shell">
     <aside class="sidebar" id="sidebar">
-      <div class="brand"><b>소버린 AI 데이터 워크벤치</b><span>분석가 1명이 여러 과제를 감독하기 위한 기능 검토 화면</span></div>
+      <div class="brand"><b>소버린 AI 데이터 워크벤치</b><span>요구사항·화면설계 검토를 위한 실행형 퍼블리싱 산출물</span></div>
       <nav id="nav" aria-label="기능 메뉴"></nav>
     </aside>
 
@@ -26,13 +27,13 @@
         </div>
       </header>
       <main class="content" id="content" tabindex="-1">
-        <section class="feature-guide"><div class="guide-headline"><div><div class="guide-kicker">화면 초기화</div><h1>기능 화면을 준비하고 있습니다.</h1><p>계속 이 문구만 보이면 JavaScript가 실행되지 않은 것입니다.</p></div></div></section>
+        <section class="feature-guide"><div class="guide-headline"><div><div class="guide-kicker">화면 초기화</div><h1>퍼블리싱 화면을 준비하고 있습니다.</h1><p>계속 이 문구만 보이면 JavaScript가 실행되지 않은 것입니다.</p></div></div></section>
       </main>
     </section>
   </div>
 
   <div class="dialog" id="dialog" hidden>
-    <section class="dialog-card" role="dialog" aria-modal="true">
+    <section class="dialog-card" role="dialog" aria-modal="true" aria-labelledby="dialogTitle">
       <div class="dialog-head"><h2 id="dialogTitle">상세</h2><button id="dialogClose" aria-label="닫기">×</button></div>
       <div id="dialogBody"></div>
     </section>
@@ -40,6 +41,7 @@
   <div class="toast-area" id="toasts" aria-live="polite"></div>
   <noscript><div style="padding:20px;background:#fee2e2;color:#991b1b">이 화면은 JavaScript가 필요합니다. 브라우저에서 JavaScript 사용 여부를 확인해 주세요.</div></noscript>
   <script src="./app-v2.js"></script>
+  <script src="./publishing-state-fix.js"></script>
   <script src="./mobile-nav-fix.js"></script>
 </body>
 </html>
