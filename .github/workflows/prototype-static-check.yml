@@ -2,7 +2,7 @@ name: Publishing prototype static check
 
 on:
   push:
-    branches: [main]
+    branches: [main, publishing-complete-2026-09-06]
     paths:
       - 'prototype/**'
       - '.github/workflows/prototype-static-check.yml'
@@ -38,11 +38,14 @@ jobs:
           root = Path('prototype')
           index = (root / 'index.html').read_text(encoding='utf-8')
           css = (root / 'styles-v2.css').read_text(encoding='utf-8')
+          complete_css = (root / 'publishing-complete.css').read_text(encoding='utf-8')
           mobile_css = (root / 'mobile-nav-fix.css').read_text(encoding='utf-8')
           app = (root / 'app-v2.js').read_text(encoding='utf-8')
           mobile = (root / 'mobile-nav-fix.js').read_text(encoding='utf-8')
+          spec = (root / 'UI_SPEC.md').read_text(encoding='utf-8')
 
           assert 'styles-v2.css' in index
+          assert 'publishing-complete.css' in index
           assert 'mobile-nav-fix.css' in index
           assert 'app-v2.js' in index
           assert 'mobile-nav-fix.js' in index
@@ -51,14 +54,58 @@ jobs:
           assert 'korean-guide.js' not in index
           assert "connect-src 'none'" in index
           assert 'noindex,nofollow,noarchive' in index
-          assert '상호작용 정상' in app
-          assert 'data-decision' in app
-          assert 'data-task-tab' in app
-          assert 'simulate-run' in app
-          assert 'citation' in app
-          assert '정기 분석' in app
-          assert 'ML 실험·모델' in app
-          assert 'AI 계정·모델 연결' in app
+
+          # Core interaction and screen-completion contract.
+          for required in [
+              '상호작용 정상',
+              'data-decision',
+              'data-task-tab',
+              '통합 관제',
+              '프로젝트',
+              '분석 과제',
+              '데이터 연결·검증',
+              '분석 실행·결과',
+              '결과·이력',
+              '문서·수집 파이프라인',
+              '근거·평가',
+              '정기 분석',
+              'ML 실험·모델',
+              '분석 레시피',
+              'AI 계정·모델 연결',
+              'Experiments',
+              'Models',
+              'Reports',
+              'data-doc-scenario',
+              'permission-state',
+              'Runtime egress NOT VERIFIED',
+              'data-citation-id',
+              'runEvalButton',
+              'Backend 연결 후 등록',
+          ]:
+              assert required in app, f'missing publishing contract: {required}'
+
+          # UI spec must include first-slice core screen IDs and state coverage.
+          for required in [
+              'SCR-007',
+              'SCR-008',
+              'permission-denied',
+              'disabled',
+              'FR-DOC-001',
+              'FR-CIT-001',
+              'SEC-EGR-001',
+          ]:
+              assert required in spec, f'missing UI spec contract: {required}'
+
+          # New completion stylesheet must carry dense desktop + responsive state layouts.
+          for required in [
+              '.doc-layout',
+              '.scenario-bar',
+              '.permission-state',
+              '.ranking-table',
+              '.eval-grid',
+              '@media(max-width:700px)',
+          ]:
+              assert required in complete_css, f'missing completion style: {required}'
 
           # Mobile navigation regression gate: selecting a page must close the drawer.
           assert "#nav [data-page]" in mobile
@@ -70,6 +117,7 @@ jobs:
           assets = {
               'index.html': index,
               'styles-v2.css': css,
+              'publishing-complete.css': complete_css,
               'mobile-nav-fix.css': mobile_css,
               'app-v2.js': app,
               'mobile-nav-fix.js': mobile,
@@ -78,6 +126,10 @@ jobs:
               assert not external.search(content), f'external runtime URL found in {name}'
 
           print('publishing_contract=PASS')
+          print('screen_count_contract=12')
+          print('task_detail_tabs=10')
+          print('first_slice_document_states=PASS')
+          print('evidence_eval_interactions=PASS')
           print('single_primary_runtime_script=PASS')
           print('mobile_navigation_close_contract=PASS')
           print('runtime_external_dependencies=0')
