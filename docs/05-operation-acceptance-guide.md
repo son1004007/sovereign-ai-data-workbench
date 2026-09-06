@@ -1,7 +1,8 @@
 # Operation / Acceptance / Handover Guide
 
 Baseline: 2026-09-06
-Status: phase-1 backend acceptance plan; runtime results pending
+Status: phase-1 backend source + CI integration verified; independent review/NAS runtime pending
+Evidence anchor: commit `94c6fc65f492a983164645ca1aebe892a8408fd2`, Backend CI run `34001712895`.
 
 ## Runtime Components
 
@@ -79,30 +80,43 @@ Restore acceptance must verify that document metadata still resolves to artifact
 
 ## Acceptance Matrix — Current Baseline
 
-| Check | Evidence | Result | Notes |
+| Check | Evidence | Result | Release Impact / Notes |
 | --- | --- | --- | --- |
-| Publishing static check | existing GitHub workflow / prior runtime evidence | PASS | synthetic/static only |
+| Publishing static check | prior publishing workflow/runtime evidence | PASS | synthetic/static only |
 | Korean guided publishing | `CURRENT_STATE.md` prior verification | PASS | backend not connected |
-| Backend source exists | repository after phase-1 code commit | PENDING | |
-| Unit tests | CI/local execution | NOT RUN | new code not yet executed |
-| PostgreSQL migration | CI/runtime | NOT RUN | |
-| pgvector extension | CI/runtime | NOT RUN | |
-| Durable job claim | integration test | NOT RUN | |
-| SHA-256 provenance | unit/integration test | NOT RUN | |
-| bbox PDF extraction | generated/public PDF test | NOT RUN | |
-| API upload -> worker -> READY | end-to-end smoke | NOT RUN | |
-| NAS backend runtime | device-control bounded deployment | NOT RUN | |
+| Backend source baseline | commit `94c6fc65...` | PASS | source exists; not equal to runtime deployment |
+| Ruff lint | Backend CI run `34001712895`, step `Lint` | PASS | |
+| PostgreSQL migration | Backend CI run `34001712895`, `Apply database migration` | PASS | pgvector/PostgreSQL service |
+| pgvector extension/schema | migration in same CI run | PASS | vector extension + baseline tables created |
+| Unit/integration tests | Backend CI run `34001712895`, `Run tests` | PASS | storage/extractor/job/worker tests |
+| Durable job exclusive claim | `test_db_integration.py` | PASS | `FOR UPDATE SKIP LOCKED` behavior exercised |
+| SHA-256 artifact identity/dedupe/path boundary | `test_storage.py` | PASS | DB/API persistence still separately pending |
+| bbox text-layer extraction | `test_pdf_extractor.py` | PASS | no-text-layer rejection also exercised |
+| Worker queued job -> extraction -> READY/SUCCEEDED/span/trace | `test_worker_integration.py` | PASS | PostgreSQL + filesystem integration in CI |
+| HTTP multipart upload -> DB/job -> worker -> status | end-to-end API smoke | NOT RUN | required before ingestion foundation fully VERIFIED |
+| Independent AGY/Gemini final review | device-control issue `#363` | PENDING | release/Done gate not yet closed |
+| NAS backend runtime | approved device-control deployment/smoke | NOT RUN | no production/runtime claim |
+| Backup/restore | runtime exercise | NOT RUN | required before production-like use |
+| Stale RUNNING-job recovery | implementation + fault test | NOT RUN | known operational limitation |
 | Retrieval/RRF/reranker | later slice | NOT RUN | intentionally not implemented yet |
-| Citation-grounded answer | later slice | NOT RUN | |
-| Measured evaluation | later slice | NOT RUN | |
-| Zero-egress/air-gap claim | runtime evidence | NOT RUN | must not claim yet |
+| Citation-grounded answer | later slice | NOT RUN | intentionally not implemented yet |
+| Measured evaluation | later slice | NOT RUN | intentionally not implemented yet |
+| Zero-egress/air-gap claim | runtime egress evidence | NOT RUN | must not claim yet |
+
+## Current Release / Handover Interpretation
+
+This baseline is **not yet normal-Done for deployed backend operation** because independent review and runtime/API acceptance remain open.
+
+No active calibrated BLOCKER has been established yet; AGY findings remain pending review/reconciliation.
 
 ## Known Issues / Residual Risk
 
-- backend runtime and DB integration are pending implementation verification;
-- stale RUNNING job recovery is not complete;
-- broad publishing UI contains synthetic concepts beyond the first real backend slice;
+- stale `RUNNING` job recovery is not implemented/tested;
+- HTTP API multipart end-to-end path is not yet exercised;
+- NAS backend runtime and backup/restore are not tested;
+- broad publishing UI contains synthetic concepts beyond first backend slice;
 - retrieval/evaluation and credential/auth functionality are not implemented;
+- explicit egress enforcement/evidence is not implemented;
 - current public static preview is not a production deployment contract.
 
 ## Handover Boundaries
@@ -115,10 +129,8 @@ Restore acceptance must verify that document metadata still resolves to artifact
 
 ## Next Acceptance Actions
 
-After phase-1 code is committed:
-
-1. CI unit/static tests;
-2. CI PostgreSQL/pgvector migration + integration tests;
-3. AGY/Gemini independent final review;
-4. bounded NAS deploy/smoke via device-control;
-5. update this matrix with actual evidence only.
+1. complete AGY/Gemini independent final review + severity calibration/reconciliation;
+2. add HTTP multipart API -> DB/job -> worker -> status acceptance test/smoke;
+3. use approved device-control path for bounded NAS deployment and runtime smoke;
+4. verify backup/restore and stale-job policy before any production-like claim;
+5. only then mark phase-1 ingestion foundation fully verified.
