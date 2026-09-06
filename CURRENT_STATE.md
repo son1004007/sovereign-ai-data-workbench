@@ -4,9 +4,9 @@ Last updated: 2026-09-06 KST
 
 ## Status
 
-Architecture/product narrowing and the durable Korean-first UI publishing build are complete. **Phase-1 backend foundation is implemented and CI-verified, but not yet normal-Done because independent review and runtime/API acceptance remain open.**
+The repository is implementing one narrowed document-intelligence vertical slice. The **screen-design/publishing deliverable has now been expanded into a completion candidate on branch `publishing-complete-2026-09-06`** and passes the repository static publishing contract, but it is not yet declared normal-Done until independent final review/reconciliation is complete.
 
-The repository applies the `personal-engineering-handbook` DLV-01~07 deliverable model and mandatory independent-review policy v1.4.1.
+The repository applies `personal-engineering-handbook` DLV-01~07 and `REVIEW_POLICY.md` v1.4.1.
 
 ## Authoritative read order
 
@@ -18,7 +18,8 @@ The repository applies the `personal-engineering-handbook` DLV-01~07 deliverable
 6. `docs/03-database-spec.md`
 7. `docs/05-operation-acceptance-guide.md`
 8. `prototype/UI_SPEC.md`
-9. this file
+9. `prototype/README.md`
+10. this file
 
 ## First vertical slice
 
@@ -35,63 +36,109 @@ public text-layer PDF
   -> automated evaluation/regression
 ```
 
-## Phase-1 backend foundation — implemented 2026-09-06
+## DLV-02 Publishing completion candidate — 2026-09-06
 
-Implemented source:
+Branch:
 
-- `backend/pyproject.toml`
-- `backend/app/config.py`
-- `backend/app/db.py`
-- `backend/app/storage.py`
-- `backend/app/pdf_extractor.py`
-- `backend/app/repository.py`
-- `backend/app/worker.py`
-- `backend/app/main.py`
-- `backend/migrations/001_initial.sql`
-- `backend/tests/`
-- `.github/workflows/backend-ci.yml`
-- `docker-compose.yml`
+```text
+publishing-complete-2026-09-06
+```
 
-Implemented behavior:
+Primary runtime:
 
-1. bounded PDF upload/storage under configured artifact root;
-2. SHA-256 content identity and duplicate artifact reuse;
-3. FastAPI document registration + durable ingestion job creation;
-4. PyMuPDF text-layer extraction preserving page/bbox;
-5. PostgreSQL schema for documents/spans/chunks/embeddings/jobs/run traces;
-6. `FOR UPDATE SKIP LOCKED` durable job claim;
-7. worker processing and persisted success/failure state;
-8. parser name/version and run trace metadata;
-9. tests for storage, bbox extraction, durable claim and worker integration;
-10. CI for Ruff, PostgreSQL/pgvector migration and pytest.
+```text
+prototype/index.html
+-> styles-v2.css
+-> publishing-complete.css
+-> mobile-nav-fix.css
+-> app-v2.js
+-> mobile-nav-fix.js
+```
 
-## Verification evidence
+Legacy `app.js/styles.css/enhancements.js/korean-guide.js` are not current runtime evidence.
 
-Evidence anchor for current backend code: commit `94c6fc65f492a983164645ca1aebe892a8408fd2`.
+### Implemented screen coverage
 
-Backend CI run `34001712895`: **SUCCESS**.
+Core:
 
-Successful CI steps:
+1. 통합 관제
+2. 프로젝트
+3. 분석 과제
+4. 데이터 연결·검증
+5. 분석 실행·결과
+6. 결과·이력
+7. 문서·수집 파이프라인
+8. 근거·평가
 
-- backend install: PASS
-- Ruff lint: PASS
-- PostgreSQL client/setup: PASS
-- `backend/migrations/001_initial.sql`: PASS
-- pgvector extension/schema creation: PASS
-- pytest: PASS
-- exclusive durable job claim integration: PASS
-- worker -> extraction -> document READY/job SUCCEEDED/span/run_trace integration: PASS
+Conditional/recommended:
 
-### Still open
+9. 정기 분석
+10. ML 실험·모델
+11. 분석 레시피
+12. AI 계정·모델 연결
 
-- AGY/Gemini independent final review: PENDING via `device-control` issue `#363`
-- severity calibration/reconciliation: PENDING
-- HTTP multipart API -> DB/job -> worker -> status E2E: NOT RUN
-- NAS backend deployment/runtime smoke: NOT RUN
-- backup/restore: NOT RUN
-- stale `RUNNING` job recovery: NOT IMPLEMENTED/NOT RUN
+Task detail now covers the stable 10-tab contract:
 
-Therefore the backend is **source-implemented and CI-integrated, not yet claimed operational/deployed**.
+- Summary
+- Requirements
+- Data
+- Analysis Plan
+- Runs
+- Experiments
+- Models
+- QA
+- Reports
+- History
+
+### First-slice UI coverage
+
+`문서·수집 파이프라인` now covers:
+
+- source hash / document / job / parser / span status;
+- REGISTERED -> QUEUED -> PROCESSING -> EXTRACT -> READY flow;
+- mixed / processing / ready / failed / empty / permission-denied review states;
+- failed text-layer PDF state without fake OCR success;
+- backend-disabled upload contract.
+
+`근거·평가` now covers:
+
+- source SHA-256 and parser/index/model/run identity contract;
+- runtime egress `NOT VERIFIED` wording;
+- lexical/vector/RRF/reranker ranking contract;
+- stage latency contract;
+- clickable citation -> source evidence highlight;
+- unanswerable/refusal behavior;
+- synthetic evaluation interaction.
+
+### Publishing verification evidence
+
+Publishing CI run `34003929808`: **SUCCESS** at commit `930f1a2fd55be41e33369f9ca6446c42092da0f1`.
+
+Validated by CI:
+
+- `node --check` for live JavaScript;
+- 12-screen label/contract coverage;
+- 10 task-detail tabs;
+- document state scenario controls;
+- evidence/citation/eval interaction markers;
+- runtime egress `NOT VERIFIED` language;
+- responsive completion CSS contract;
+- mobile navigation regression contract;
+- zero external runtime URL dependency.
+
+Not yet claimed:
+
+- browser-level visual smoke on this branch in an accessible browser runtime;
+- independent final review/reconciliation;
+- backend/API connectivity for the synthetic UI states.
+
+## Backend foundation
+
+Backend code currently includes FastAPI, PostgreSQL/pgvector schema, bounded artifact storage, SHA-256 identity, PyMuPDF bbox extraction, durable PostgreSQL jobs, worker state persistence, run traces and CI tests.
+
+Backend verification evidence already recorded includes Backend CI run `34001712895` at commit `94c6fc65f492a983164645ca1aebe892a8408fd2` = SUCCESS. The later AGY review identified an active-job concurrency race as a credible MAJOR; repository changes added document row locking and an active-ingest uniqueness guard. Remaining backend review findings/re-verification are a separate logical change from this publishing completion work.
+
+Do not report the backend as deployed/operational merely because the publishing screen exists.
 
 ## Deliverables
 
@@ -103,58 +150,33 @@ Therefore the backend is **source-implemented and CI-integrated, not yet claimed
 - DLV-06: `docs/04-install-deployment-guide.md`
 - DLV-07: `docs/05-operation-acceptance-guide.md`
 
-## Publishing build
-
-The static publishing build remains the durable UI/interaction reference and is Korean-first, analyst-supervisor oriented, and synthetic-data only.
-
-Major publishing concepts include:
-
-- multi-project Control Center;
-- analysis task lifecycle/detail;
-- recurring analysis/run comparison/drift;
-- experiment/model registry concepts;
-- data source/profiling concepts;
-- analysis recipe concepts;
-- evidence/retrieval inspector and citation-to-bbox interaction;
-- synthetic mini-evaluation;
-- AI profile/provider UX;
-- desktop-first responsive behavior.
-
-Broad UI concepts remain synthetic/reference until backed by real contracts. Backend integration follows the narrowed first slice rather than implementing every publishing page at once.
-
-## Prior publishing runtime evidence
-
-Last explicitly recorded publishing verification was 2026-09-03:
-
-- Synology loopback static HTTP: PASS;
-- Cloudflare Quick Tunnel container: running at that time;
-- external HTTP post-check from Synology: PASS;
-- content: synthetic static UI only;
-- public authentication: none.
-
-The old Quick Tunnel URL is temporary and is not treated as current.
-
 ## Runtime / agent boundary
 
 - GitHub is the durable source-of-truth.
 - NAS runtime/device access must use `son1004007/device-control` bounded policy.
-- direct `sovereign-workbench` AGY workspace review was attempted but rejected because that workspace/path is not allow-listed; no bypass was used.
-- final independent review therefore uses an allow-listed read-only AGY workspace with the exact target-code snapshot in the review payload.
+- current execution container could not clone GitHub for local browser smoke because outbound GitHub DNS/network was unavailable; this is recorded as NOT RUN, not PASS.
 - public/company-sensitive boundaries in `AGENTS.md` remain mandatory.
 
-## Next implementation work
+## Next work
 
-After independent review/reconciliation closes the current foundation:
+Publishing change:
 
-1. add HTTP multipart API -> DB/job -> worker -> status acceptance test;
-2. bounded NAS deployment and API/worker/PostgreSQL smoke through approved device-control path;
-3. implement deterministic chunk generation and span->chunk lineage;
-4. implement PostgreSQL lexical FTS retrieval;
-5. select/measure local embedding model and implement pgvector retrieval;
-6. implement RRF + local reranker;
-7. implement citation response contract and progressively connect Evidence UI;
-8. implement reproducible evaluation harness/metrics;
-9. implement/test explicit egress policy before stronger sovereignty claims.
+1. independent AGY/Gemini final review of the publishing branch/diff;
+2. reconcile findings;
+3. merge only after review gate is satisfied;
+4. browser/runtime visual smoke when an approved accessible environment is available.
+
+Product/backend next slice after the current foundation is reconciled:
+
+1. HTTP multipart API -> DB/job -> worker -> status acceptance;
+2. bounded NAS deployment/runtime smoke;
+3. deterministic chunk generation + span lineage;
+4. PostgreSQL lexical FTS;
+5. pgvector dense retrieval;
+6. RRF + local reranker;
+7. citation response API connected to SCR-008;
+8. reproducible evaluation harness;
+9. explicit runtime egress enforcement/evidence.
 
 ## Deferred
 
