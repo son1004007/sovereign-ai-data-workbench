@@ -2,7 +2,7 @@
 
 Baseline: 2026-09-06
 Backend verification anchor: commit `94c6fc65f492a983164645ca1aebe892a8408fd2`, Backend CI run `34001712895`.
-Publishing verification anchor: branch `publishing-complete-2026-09-06`, publishing CI run `34003929808` = PASS.
+Publishing acceptance anchor: PR `#1`, merge commit `0cabead92d71bdf12a1c44d7a6b4b88191d0d7dc`, main publishing CI run `34004329598` = PASS, independent review `device-control#366` = READY_FOR_RECONCILIATION / calibrated BLOCKER 0 / MAJOR 0.
 
 ## Scope
 
@@ -42,9 +42,9 @@ OCR/VLM, L40S serving, Spring/JPA/RBAC, LangGraph, MCP, Kafka, mandatory Redis, 
 | FR-CIT-001 | Factual answer citations resolve to retrieved chunk and source PDF page/bbox. | `DECISIONS.md`, `prototype/UI_SPEC.md` | CONFIRMED | IN_PROGRESS | citation identifies evidence document/page/bbox | span foundation; UI SCR-008 | publishing citation selection changes source evidence highlight; backend retrieval/answer contract absent | PASS (publishing only) |
 | FR-EVAL-001 | Evaluation is reproducible and part of product. | `DECISIONS.md` | CONFIRMED | PLANNED | eval run stores dataset/version/config and measured retrieval/citation/latency | planned; UI SCR-008 | synthetic mini-eval UX + explicit non-measured label PASS; backend harness absent | NOT RUN |
 | FR-OBS-001 | Request/job/evaluation traces record enough versions/IDs to reproduce results. | `DECISIONS.md` | CONFIRMED | IN_PROGRESS | applicable run IDs, parser/index/model versions, ranks/scores, latency recorded | `run_traces`; UI SCR-007/008 | parser/job trace integration PASS; publishing inspector contract PASS; retrieval/eval trace absent | PASS (phase-1 partial) |
-| SEC-EGR-001 | Explicit egress policy; no zero-egress/air-gap claim without runtime evidence. | `DECISIONS.md`, `AGENTS.md` | CONFIRMED | IN_PROGRESS | execution mode/network behavior explicit and unsupported sovereignty claim absent | docs/policy; UI global banner/SCR-008/012 | publishing changed to `Runtime egress NOT VERIFIED`; runtime enforcement/test absent | PASS (publishing wording) |
+| SEC-EGR-001 | Explicit egress policy; no zero-egress/air-gap claim without runtime evidence. | `DECISIONS.md`, `AGENTS.md` | CONFIRMED | IN_PROGRESS | execution mode/network behavior explicit and unsupported sovereignty claim absent | docs/policy; UI global banner/SCR-008/012 | publishing uses `Runtime egress NOT VERIFIED`; runtime enforcement/test absent | PASS (publishing wording) |
 | SEC-DATA-001 | Public repo/runtime examples use public or synthetic data only. | `AGENTS.md`, `PROJECT_BRIEF.md` | CONFIRMED | VERIFIED | no company/internal data/credentials/private topology committed | repository + publishing content | current static/review evidence | PASS |
-| UI-001 | Publishing remains engineering inspection workbench, not chatbot-first. | `prototype/UI_SPEC.md`, `DECISIONS.md` | CONFIRMED | IMPLEMENTED_NOT_VERIFIED | task/document/evidence inspection is primary; first-slice states and synthetic/backend boundary are explicit | `prototype/index.html`, `app-v2.js`, `styles-v2.css`, `publishing-complete.css`, `UI_SPEC.md` | publishing CI run `34003929808` PASS; independent final review pending | PASS (static contract) |
+| UI-001 | Publishing remains engineering inspection workbench, not chatbot-first. | `prototype/UI_SPEC.md`, `DECISIONS.md` | CONFIRMED | VERIFIED | task/document/evidence inspection is primary; first-slice states and synthetic/backend boundary are explicit | `prototype/index.html`, `app-v2.js`, `publishing-state-fix.js`, `styles-v2.css`, `publishing-complete.css`, `UI_SPEC.md` | PR-head CI `34004208520` PASS; AGY review `device-control#366` READY; main CI `34004329598` PASS | PASS |
 
 ## DLV-02 Publishing Coverage
 
@@ -55,6 +55,7 @@ OCR/VLM, L40S serving, Spring/JPA/RBAC, LangGraph, MCP, Kafka, mandatory Redis, 
 | document ingestion | SCR-007 | mixed/processing/ready/failed/empty/permission states |
 | upload dependency | SCR-007 | actual submit disabled until backend connection |
 | durable job visibility | SCR-007 | document/job/status/pipeline contract |
+| document list/detail consistency | SCR-007 | scenario reconciliation helper + CI contract |
 | provenance | SCR-007/008 | SHA/parser/artifact/run identity contract |
 | citation/bbox | SCR-008 | clickable citation changes highlighted source evidence |
 | retrieval inspection | SCR-008 | lexical/vector/RRF/reranker/latency synthetic contract |
@@ -83,9 +84,11 @@ OCR/VLM, L40S serving, Spring/JPA/RBAC, LangGraph, MCP, Kafka, mandatory Redis, 
 
 ## Current Completion Boundary
 
-### Publishing
+### Publishing — accepted for current static milestone
 
-Implemented and static-CI verified on `publishing-complete-2026-09-06`:
+Merged to `main` through PR #1.
+
+Verified/reviewed:
 
 - 12 reachable menu screens;
 - separate project context;
@@ -93,14 +96,18 @@ Implemented and static-CI verified on `publishing-complete-2026-09-06`:
 - first-slice document ingestion state screen;
 - first-slice provenance/retrieval/citation/evaluation inspection screen;
 - empty/error/disabled/permission/policy-denied review states;
+- document scenario list/detail consistency contract;
 - synthetic vs real/runtime boundary wording;
 - mobile/responsive styles and navigation regression contract;
-- zero external runtime dependency contract.
+- zero external runtime URL dependency contract;
+- PR-head static CI `34004208520` PASS;
+- independent AGY/Gemini review `device-control#366`: READY_FOR_RECONCILIATION;
+- calibrated BLOCKER 0 / calibrated MAJOR 0;
+- post-merge `main` static CI `34004329598` PASS.
 
-Still required before DLV-02 is called fully accepted:
+Explicitly NOT RUN:
 
-- independent AGY/Gemini final review and reconciliation;
-- browser/runtime visual smoke in an approved accessible environment if available.
+- browser-level visual smoke in the current ChatGPT execution environment because outbound GitHub DNS/network was unavailable. This is recorded as a residual verification gap rather than PASS. Independent review assessed it as non-blocking for this low-risk static milestone.
 
 ### Backend
 
@@ -115,7 +122,7 @@ Implemented and CI-verified foundation:
 Still required before ingestion backend foundation is fully verified:
 
 - HTTP multipart API -> DB/job -> worker -> status E2E;
-- backend independent review reconciliation of accepted findings;
+- backend review/re-verification after accepted concurrency guard changes;
 - NAS/runtime smoke via approved device-control path.
 
 Retrieval/reranking/citation/evaluation backend logic remains later work and is not represented as implemented.
@@ -129,7 +136,7 @@ Retrieval/reranking/citation/evaluation backend logic remains later work and is 
 
 ## Residual Risk
 
-- browser-level visual smoke has not been executed for this publishing branch in the current environment;
+- browser-level visual smoke is NOT RUN for the merged publishing build in the current environment;
 - NAS runtime compatibility/performance is not yet measured for backend;
 - stale `RUNNING` job recovery is not implemented/tested;
 - explicit runtime egress enforcement/evidence is not yet implemented.
