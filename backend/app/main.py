@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import Annotated
 from uuid import UUID, uuid4
 
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
@@ -52,7 +53,7 @@ async def health() -> dict[str, object]:
 
 
 @app.post("/api/v1/documents", status_code=202)
-async def create_document(file: UploadFile = File(...)) -> dict[str, object]:
+async def create_document(file: Annotated[UploadFile, File()]) -> dict[str, object]:
     original_name = Path(file.filename or "document.pdf").name
     media_type = file.content_type or "application/octet-stream"
 
