@@ -1,6 +1,5 @@
 import hashlib
 import os
-from pathlib import Path
 from uuid import uuid4
 
 import asyncpg
