@@ -1,24 +1,23 @@
 # Current State
 
-Last updated: 2026-09-03 KST
+Last updated: 2026-09-06 KST
 
 ## Status
 
-Architecture/product narrowing is complete and the durable UI publishing build is live from the Synology NAS. Backend product implementation has not started yet.
+Architecture/product narrowing and the durable Korean-first UI publishing build are complete. **Phase-1 backend implementation has now started** against the narrowed document-intelligence vertical slice.
 
-The publishing build is now **Korean-first and feature-judgment oriented**. It is intended to help a reviewer understand each page before deciding whether the feature belongs in the product.
+The repository now also applies the `personal-engineering-handbook` DLV-01~07 deliverable model and mandatory independent-review policy v1.4.1.
 
-## Authoritative scope
-
-Read in this order:
+## Authoritative read order
 
 1. `AGENTS.md`
 2. `PROJECT_BRIEF.md`
 3. `DECISIONS.md`
-4. `prototype/UI_SPEC.md`
-5. this file
-
-`DECISIONS.md` narrows the broad product brief into the first implementation slice. `prototype/UI_SPEC.md` is the current UI/information-architecture contract.
+4. `docs/01-requirements-and-traceability.md`
+5. `docs/02-system-design.md`
+6. `docs/03-database-spec.md`
+7. `prototype/UI_SPEC.md`
+8. this file
 
 ## First vertical slice
 
@@ -27,6 +26,7 @@ public text-layer PDF
   -> SHA-256 provenance
   -> page/bbox-preserving extraction
   -> PostgreSQL + pgvector
+  -> durable PostgreSQL-backed job worker
   -> PostgreSQL lexical FTS + vector retrieval + RRF
   -> local reranker
   -> citation-grounded result
@@ -34,103 +34,111 @@ public text-layer PDF
   -> automated evaluation/regression
 ```
 
+## Phase-1 backend implementation — added 2026-09-06
+
+Implemented source baseline:
+
+- `backend/pyproject.toml`
+- `backend/app/config.py`
+- `backend/app/db.py`
+- `backend/app/storage.py`
+- `backend/app/pdf_extractor.py`
+- `backend/app/repository.py`
+- `backend/app/worker.py`
+- `backend/app/main.py`
+- `backend/migrations/001_initial.sql`
+- `backend/tests/`
+- `.github/workflows/backend-ci.yml`
+- `docker-compose.yml`
+
+Current implemented intent:
+
+1. bounded PDF upload/storage under a configured artifact root;
+2. SHA-256 content identity and duplicate artifact reuse;
+3. FastAPI document registration + durable ingestion job creation;
+4. PyMuPDF text-layer extraction preserving page/bbox per extracted word/span;
+5. PostgreSQL schema for documents/spans/chunks/embeddings/jobs/run traces;
+6. `FOR UPDATE SKIP LOCKED` durable job claim;
+7. worker state transitions and bounded failure recording;
+8. unit tests for PDF extraction/storage boundary;
+9. PostgreSQL integration test for exclusive durable job claim;
+10. CI intended to run Ruff, pgvector migration and pytest.
+
+### Verification status
+
+The source is **implemented but not yet accepted as Done**.
+
+- source committed: PASS
+- independent review: PENDING
+- GitHub backend CI: PENDING CHECK
+- PostgreSQL migration execution: NOT YET CONFIRMED
+- integration tests: NOT YET CONFIRMED
+- NAS backend deploy/smoke: NOT RUN
+
+Do not report the backend as operational until these checks have evidence.
+
+## Deliverables
+
+- DLV-01: `docs/01-requirements-and-traceability.md`
+- DLV-02: `prototype/`, `prototype/UI_SPEC.md`, `prototype/README.md`
+- DLV-03: `docs/02-system-design.md`, `DECISIONS.md`
+- DLV-04: `docs/03-database-spec.md`, `backend/migrations/`
+- DLV-05: `backend/`, `prototype/`, `.github/workflows/`
+- DLV-06: `docs/04-install-deployment-guide.md`
+- DLV-07: `docs/05-operation-acceptance-guide.md`
+
 ## Publishing build
 
-Source:
+The static publishing build remains the durable UI/interaction reference and is Korean-first, analyst-supervisor oriented, and synthetic-data only.
 
-```text
-prototype/index.html
-prototype/styles.css
-prototype/guide.css
-prototype/app.js
-prototype/enhancements.js
-prototype/korean-guide.js
-prototype/README.md
-prototype/UI_SPEC.md
-```
-
-The build is intentionally dependency-free static HTML/CSS/JS and contains only synthetic example projects/data/metrics.
-
-### Korean guided review mode
-
-The visible UI is Korean-first. Technical product terms such as SQL, RAG, MAPE, LightGBM and provider/product names remain where they are useful, but navigation, task names, statuses, controls and explanations are localized.
-
-Every major page receives a guidance panel with:
-
-- what the page is for;
-- when the analyst uses it;
-- what information matters on the page;
-- what happens if the feature does not exist;
-- one concrete usage example;
-- an explicit product judgment label: `필수`, `권장`, or `조건부`.
-
-Current judgment guidance:
-
-- 통합 관제: 필수;
-- 프로젝트: 필수;
-- 분석 과제 / 과제 상세: 필수;
-- 데이터 소스: 필수;
-- 분석 레시피: 권장;
-- AI 계정·모델 연결: 권장;
-- 정기 분석: 반복 업무가 있을 때 조건부;
-- ML 실험·모델: ML을 사용할 때 조건부;
-- 근거·평가: 문서 AI/RAG를 사용할 때 조건부.
-
-Implemented publishing interactions include:
+Major implemented publishing concepts include:
 
 - multi-project Control Center;
-- analysis-task list/search/filter and task detail;
-- G1-G6 lifecycle presentation;
-- explicit Code & Execution and Results task views;
-- recurring analysis/run comparison/drift presentation;
-- experiments/model registry and explicit candidate activation review;
-- data-source/profiling views;
-- reusable Analysis Recipe catalog and recipe-promotion flow;
+- analysis task lifecycle and task detail;
+- recurring analysis / run comparison / drift;
+- experiment/model registry concepts;
+- data source/profiling concepts;
+- analysis recipe concepts;
 - evidence/retrieval inspector and citation-to-bbox interaction;
-- synthetic mini-evaluation interaction;
-- personal AI-provider profile selection UX;
-- create/review modal flows;
-- desktop-first responsive behavior for narrow/mobile screens.
+- synthetic mini-evaluation;
+- AI profile/provider UX;
+- desktop-first responsive behavior.
 
-Static publishing hardening includes no external frontend dependencies, `noindex`, no-referrer and a CSP that denies browser network connections (`connect-src 'none'`) in this publishing build.
+The publishing build has no real API/auth/database/model execution yet. Backend integration will replace synthetic states progressively rather than forcing all broad UI concepts into the first backend slice.
 
-The `Publishing prototype static check` workflow validates JavaScript syntax including `korean-guide.js`, required guided-review assets, Korean feature-judgment markers, routing, CSP and zero external runtime URLs. The latest Korean-guided check passed on 2026-09-03.
+## Prior publishing runtime evidence
 
-## Current NAS publishing runtime
-
-Owned by `son1004007/device-control` through the bounded `Sovereign prototype runtime` operation.
-
-Verified 2026-09-03 after Korean guided publishing update:
+Last explicitly recorded publishing verification was 2026-09-03:
 
 - Synology loopback static HTTP: PASS;
-- Cloudflare Quick Tunnel container: running;
+- Cloudflare Quick Tunnel container: running at that time;
 - external HTTP post-check from Synology: PASS;
-- current preview URL: `https://conversion-insurance-throughout-youth.trycloudflare.com`;
-- published content: synthetic static UI only;
+- content: synthetic static UI only;
 - public authentication: none.
 
-The Quick Tunnel URL is temporary and may change after tunnel/container restart. It is a review/share URL, not a production deployment contract.
+The old Quick Tunnel URL is not treated as current because it is temporary.
 
-## Agent/runtime status
+## Runtime / agent boundary
 
-- Synology `sovereign-workbench` remains the dedicated non-production agent workspace managed through `son1004007/device-control`.
-- Existing operational workspaces remain separate.
-- AGY architecture/IA reviews have been useful through the restricted bridge.
-- AGY `workspace-write` is still not accepted as an authoring path. A prior canary returned success without modifying files. The later full static-QA attempt timed out and was rolled back, so GitHub CI/runtime evidence remains the acceptance gate.
-- Codex remains unavailable while account usage quota prevents execution.
-- GitHub remains the durable source-of-truth authoring path; NAS is the publishing/runtime target.
+- Synology `sovereign-workbench` is the dedicated non-production workspace managed by `son1004007/device-control`.
+- GitHub remains the durable source-of-truth authoring path.
+- NAS deployment/runtime access must use the bounded device-control path.
+- public/company-sensitive boundaries in `AGENTS.md` remain mandatory.
 
-## Next product work
+## Next implementation work
 
-1. review the Korean guided publishing build page by page and decide `유지 / 단순화 / 제거 / 나중`;
-2. reflect those decisions in `prototype/UI_SPEC.md` before backend implementation;
-3. define provenance/document/chunk/job/evaluation schemas;
-4. implement coordinate-preserving text-layer PDF ingestion;
-5. implement PostgreSQL/pgvector persistence and durable Postgres-backed job worker;
-6. implement lexical FTS + vector retrieval + RRF + reranker;
-7. implement citation/bbox response contract and automated evaluation;
-8. progressively replace synthetic UI states with real backend contracts and measured evidence.
+After current source passes CI + independent review:
+
+1. bounded NAS deployment and API/worker/PostgreSQL smoke test;
+2. update DLV-01/DLV-07 with actual PASS/FAIL evidence;
+3. implement deterministic chunk generation and span->chunk lineage;
+4. implement PostgreSQL lexical FTS;
+5. select/measure local embedding model and implement pgvector retrieval;
+6. implement RRF + local reranker;
+7. implement citation response contract and progressively connect the Evidence UI;
+8. implement reproducible evaluation harness and measured metrics;
+9. implement/test explicit egress policy before making stronger sovereignty claims.
 
 ## Deferred
 
-OCR/VLM, L40S serving, Spring/JPA/RBAC integration, LangGraph, MCP and a dedicated observability dashboard come after the first measured vertical slice. Kafka, mandatory Redis, Kubernetes and LoRA are intentionally out of current scope.
+OCR/VLM, L40S serving, Spring/JPA/RBAC, LangGraph, MCP, dedicated observability dashboard, Kafka, mandatory Redis, Kubernetes and LoRA remain outside the first measured vertical slice.
