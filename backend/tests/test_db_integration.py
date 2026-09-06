@@ -16,7 +16,8 @@ async def test_claim_next_job_is_durable_and_exclusive() -> None:
     conn = await asyncpg.connect(database_url)
     try:
         await conn.execute(
-            "TRUNCATE run_traces, jobs, chunk_embeddings, chunks, document_spans, documents CASCADE"
+            "TRUNCATE run_traces, jobs, chunk_embeddings, chunks, "
+            "document_spans, documents CASCADE"
         )
         document_id = uuid4()
         job_id = uuid4()
@@ -25,7 +26,10 @@ async def test_claim_next_job_is_durable_and_exclusive() -> None:
             INSERT INTO documents (
                 id, sha256, original_name, artifact_ref, media_type, byte_size, status
             )
-            VALUES ($1, $2, 'sample.pdf', 'documents/sample.pdf', 'application/pdf', 10, 'REGISTERED')
+            VALUES (
+                $1, $2, 'sample.pdf', 'documents/sample.pdf',
+                'application/pdf', 10, 'REGISTERED'
+            )
             """,
             document_id,
             "a" * 64,
