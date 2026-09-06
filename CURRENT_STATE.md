@@ -4,7 +4,9 @@ Last updated: 2026-09-06 KST
 
 ## Status
 
-The repository is implementing one narrowed document-intelligence vertical slice. The **screen-design/publishing deliverable has now been expanded into a completion candidate on branch `publishing-complete-2026-09-06`** and passes the repository static publishing contract, but it is not yet declared normal-Done until independent final review/reconciliation is complete.
+The repository is implementing one narrowed document-intelligence vertical slice.
+
+**DLV-02 screen-design/publishing is now merged to `main` and accepted for the current low-risk static milestone.** The publishing artifact is an executable review contract; it does not imply that backend/retrieval/evaluation functionality is already live.
 
 The repository applies `personal-engineering-handbook` DLV-01~07 and `REVIEW_POLICY.md` v1.4.1.
 
@@ -36,13 +38,12 @@ public text-layer PDF
   -> automated evaluation/regression
 ```
 
-## DLV-02 Publishing completion candidate — 2026-09-06
+## DLV-02 Publishing — accepted 2026-09-06
 
-Branch:
+Merged PR:
 
-```text
-publishing-complete-2026-09-06
-```
+- PR: `#1 feat: complete screen-design publishing deliverable`
+- merge commit: `0cabead92d71bdf12a1c44d7a6b4b88191d0d7dc`
 
 Primary runtime:
 
@@ -52,12 +53,13 @@ prototype/index.html
 -> publishing-complete.css
 -> mobile-nav-fix.css
 -> app-v2.js
+-> publishing-state-fix.js
 -> mobile-nav-fix.js
 ```
 
-Legacy `app.js/styles.css/enhancements.js/korean-guide.js` are not current runtime evidence.
+Legacy `app.js`, `styles.css`, `enhancements.js`, and `korean-guide.js` are not current runtime evidence.
 
-### Implemented screen coverage
+### Screen coverage
 
 Core:
 
@@ -77,7 +79,7 @@ Conditional/recommended:
 11. 분석 레시피
 12. AI 계정·모델 연결
 
-Task detail now covers the stable 10-tab contract:
+Task detail has the stable 10-tab contract:
 
 - Summary
 - Requirements
@@ -92,51 +94,63 @@ Task detail now covers the stable 10-tab contract:
 
 ### First-slice UI coverage
 
-`문서·수집 파이프라인` now covers:
+`문서·수집 파이프라인` covers:
 
-- source hash / document / job / parser / span status;
-- REGISTERED -> QUEUED -> PROCESSING -> EXTRACT -> READY flow;
+- source hash / document / job / parser / span state;
+- `REGISTERED -> QUEUED -> PROCESSING -> EXTRACT -> READY`;
 - mixed / processing / ready / failed / empty / permission-denied review states;
-- failed text-layer PDF state without fake OCR success;
-- backend-disabled upload contract.
+- failed text-layer PDF without fake OCR success;
+- backend-disabled upload contract;
+- list/detail reconciliation when scenario filters change.
 
-`근거·평가` now covers:
+`근거·평가` covers:
 
 - source SHA-256 and parser/index/model/run identity contract;
-- runtime egress `NOT VERIFIED` wording;
+- runtime egress `NOT VERIFIED`;
 - lexical/vector/RRF/reranker ranking contract;
 - stage latency contract;
-- clickable citation -> source evidence highlight;
+- citation -> source evidence highlight;
 - unanswerable/refusal behavior;
-- synthetic evaluation interaction.
+- synthetic mini-evaluation.
 
-### Publishing verification evidence
+### Publishing verification and review evidence
 
-Publishing CI run `34003929808`: **SUCCESS** at commit `930f1a2fd55be41e33369f9ca6446c42092da0f1`.
+PR-head CI:
 
-Validated by CI:
+- run `34004208520`: **SUCCESS** on head `e717d15c32e5c4ba2cc4a8823f27d9c754789a4d`
 
-- `node --check` for live JavaScript;
-- 12-screen label/contract coverage;
+Post-merge `main` CI:
+
+- run `34004329598`: **SUCCESS** on merge commit `0cabead92d71bdf12a1c44d7a6b4b88191d0d7dc`
+
+Independent review:
+
+- `son1004007/device-control#366`
+- AGY/Gemini verdict: `READY_FOR_RECONCILIATION`
+- calibrated BLOCKER: 0
+- calibrated MAJOR: 0
+- NITs: bounded duplicate render/search/style observations accepted for this static milestone
+
+CI verifies:
+
+- live JavaScript syntax;
+- 12-screen contract;
 - 10 task-detail tabs;
-- document state scenario controls;
-- evidence/citation/eval interaction markers;
+- document scenario and stale-detail reconciliation markers;
+- evidence/citation/eval interaction contract;
 - runtime egress `NOT VERIFIED` language;
-- responsive completion CSS contract;
-- mobile navigation regression contract;
+- responsive CSS/mobile navigation contract;
 - zero external runtime URL dependency.
 
-Not yet claimed:
+### Explicit NOT RUN
 
-- browser-level visual smoke on this branch in an accessible browser runtime;
-- independent final review/reconciliation;
-- backend/API connectivity for the synthetic UI states.
+Browser-level visual smoke for the merged publishing build is **NOT RUN** in the current ChatGPT execution environment because outbound GitHub DNS/network was unavailable. The independent reviewer assessed this as non-blocking for this low-risk personal/public static publishing milestone because deterministic syntax/static CI passed and the gap is explicit rather than represented as PASS.
 
-## Backend foundation
+## Backend foundation — separate logical change
 
 Backend code currently includes FastAPI, PostgreSQL/pgvector schema, bounded artifact storage, SHA-256 identity, PyMuPDF bbox extraction, durable PostgreSQL jobs, worker state persistence, run traces and CI tests.
 
-Backend verification evidence already recorded includes Backend CI run `34001712895` at commit `94c6fc65f492a983164645ca1aebe892a8408fd2` = SUCCESS. The later AGY review identified an active-job concurrency race as a credible MAJOR; repository changes added document row locking and an active-ingest uniqueness guard. Remaining backend review findings/re-verification are a separate logical change from this publishing completion work.
+Earlier backend evidence includes CI run `34001712895` at commit `94c6fc65f492a983164645ca1aebe892a8408fd2` = SUCCESS. A later independent review identified an active-job concurrency race; repository changes added document-row locking and an active-ingest uniqueness guard. Backend review/re-verification and runtime/API acceptance remain separate from DLV-02 publishing acceptance.
 
 Do not report the backend as deployed/operational merely because the publishing screen exists.
 
@@ -153,20 +167,10 @@ Do not report the backend as deployed/operational merely because the publishing 
 ## Runtime / agent boundary
 
 - GitHub is the durable source-of-truth.
-- NAS runtime/device access must use `son1004007/device-control` bounded policy.
-- current execution container could not clone GitHub for local browser smoke because outbound GitHub DNS/network was unavailable; this is recorded as NOT RUN, not PASS.
+- NAS/runtime access must use `son1004007/device-control` bounded policy.
 - public/company-sensitive boundaries in `AGENTS.md` remain mandatory.
 
-## Next work
-
-Publishing change:
-
-1. independent AGY/Gemini final review of the publishing branch/diff;
-2. reconcile findings;
-3. merge only after review gate is satisfied;
-4. browser/runtime visual smoke when an approved accessible environment is available.
-
-Product/backend next slice after the current foundation is reconciled:
+## Next product/backend work
 
 1. HTTP multipart API -> DB/job -> worker -> status acceptance;
 2. bounded NAS deployment/runtime smoke;
