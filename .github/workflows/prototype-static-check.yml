@@ -27,6 +27,7 @@ jobs:
         run: |
           set -euo pipefail
           node --check prototype/app-v2.js
+          node --check prototype/publishing-state-fix.js
           node --check prototype/mobile-nav-fix.js
 
       - name: Validate publishing contract
@@ -41,6 +42,7 @@ jobs:
           complete_css = (root / 'publishing-complete.css').read_text(encoding='utf-8')
           mobile_css = (root / 'mobile-nav-fix.css').read_text(encoding='utf-8')
           app = (root / 'app-v2.js').read_text(encoding='utf-8')
+          state_fix = (root / 'publishing-state-fix.js').read_text(encoding='utf-8')
           mobile = (root / 'mobile-nav-fix.js').read_text(encoding='utf-8')
           spec = (root / 'UI_SPEC.md').read_text(encoding='utf-8')
 
@@ -48,6 +50,7 @@ jobs:
           assert 'publishing-complete.css' in index
           assert 'mobile-nav-fix.css' in index
           assert 'app-v2.js' in index
+          assert 'publishing-state-fix.js' in index
           assert 'mobile-nav-fix.js' in index
           assert 'app.js' not in index
           assert 'enhancements.js' not in index
@@ -55,7 +58,6 @@ jobs:
           assert "connect-src 'none'" in index
           assert 'noindex,nofollow,noarchive' in index
 
-          # Core interaction and screen-completion contract.
           for required in [
               '상호작용 정상',
               'data-decision',
@@ -84,7 +86,12 @@ jobs:
           ]:
               assert required in app, f'missing publishing contract: {required}'
 
-          # UI spec must include first-slice core screen IDs and state coverage.
+          # Scenario filtering must not leave a stale detail panel visible.
+          assert '[data-doc-scenario]' in state_fix
+          assert '[data-document-id]' in state_fix
+          assert '선택할 문서가 없습니다.' in state_fix
+          assert 'rows[0].click()' in state_fix
+
           for required in [
               'SCR-007',
               'SCR-008',
@@ -96,7 +103,6 @@ jobs:
           ]:
               assert required in spec, f'missing UI spec contract: {required}'
 
-          # New completion stylesheet must carry dense desktop + responsive state layouts.
           for required in [
               '.doc-layout',
               '.scenario-bar',
@@ -107,7 +113,6 @@ jobs:
           ]:
               assert required in complete_css, f'missing completion style: {required}'
 
-          # Mobile navigation regression gate: selecting a page must close the drawer.
           assert "#nav [data-page]" in mobile
           assert "sidebar.classList.remove('open')" in mobile
           assert 'mobile-nav-backdrop' in mobile_css
@@ -120,6 +125,7 @@ jobs:
               'publishing-complete.css': complete_css,
               'mobile-nav-fix.css': mobile_css,
               'app-v2.js': app,
+              'publishing-state-fix.js': state_fix,
               'mobile-nav-fix.js': mobile,
           }
           for name, content in assets.items():
@@ -129,6 +135,7 @@ jobs:
           print('screen_count_contract=12')
           print('task_detail_tabs=10')
           print('first_slice_document_states=PASS')
+          print('document_state_detail_reconciliation=PASS')
           print('evidence_eval_interactions=PASS')
           print('single_primary_runtime_script=PASS')
           print('mobile_navigation_close_contract=PASS')
