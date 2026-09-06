@@ -56,8 +56,12 @@ jobs:
       - name: Install PostgreSQL client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
 
-      - name: Apply database migration
-        run: psql "$WORKBENCH_DATABASE_URL" -v ON_ERROR_STOP=1 -f backend/migrations/001_initial.sql
+      - name: Apply database migrations
+        run: |
+          for migration in backend/migrations/*.sql; do
+            echo "Applying ${migration}"
+            psql "$WORKBENCH_DATABASE_URL" -v ON_ERROR_STOP=1 -f "$migration"
+          done
 
       - name: Run tests
         run: pytest -q backend/tests
