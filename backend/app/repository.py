@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
@@ -44,8 +45,16 @@ async def register_document(
     )
 
     if inserted is None:
+        # Serialize re-registration for the same content identity. Without this row lock,
+        # two concurrent requests for an existing FAILED/REGISTERED document can both
+        # observe no active job and enqueue duplicate ingestion work.
         existing = await conn.fetchrow(
-            "SELECT id, status, sha256 FROM documents WHERE sha256 = $1",
+            """
+            SELECT id, status, sha256
+            FROM documents
+            WHERE sha256 = $1
+            FOR UPDATE
+            """,
             artifact.sha256,
         )
         if existing is None:
@@ -279,6 +288,6 @@ async def record_trace(
         component_version,
         started_at,
         finished_at,
-        __import__("json").dumps(attributes or {}),
+        json.dumps(attributes or {}),
     )
     return trace_id
